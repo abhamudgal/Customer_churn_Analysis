@@ -1,0 +1,503 @@
+import numpy as np;
+import pandas as pd;
+import seaborn as sns;
+from pandas import Series,DataFrame
+import matplotlib.pyplot as plt
+
+
+
+df = pd.read_csv("/content/online.CSV");
+df.head()
+
+df.shape
+
+df.info()
+
+df.isnull().sum()
+
+df.columns
+
+df.drop(  columns = ['Unnamed: 13', '9', '#@%', 'Unnamed: 0' ] , inplace = True )
+
+df.head()
+
+Imputation - Process of filling missing values is called as imputation
+
+2 types of imputation
+
+1)  Univariate imputation ( inspired from statistics ) - mean , median and mode  
+
+2) Multivariate imputation (inspired from ml ) - knn , mice
+
+
+Salary
+
+2
+4
+NA -> (mean or median)
+8
+10
+
+Name
+
+a
+b
+c
+a
+a
+NA -> a (mode)
+
+
+-> we should go for mean and median when we have numerical values
+
+-> we go for mode when we have categorical values
+
+
+
+sns.boxplot(  df["Family size"] )
+
+sns.boxplot(  df["Age"] )
+
+familiy_size_mean = int(df["Family size"].mean())
+familiy_size_mean
+
+df["Family size"] = df["Family size"].fillna(familiy_size_mean)
+
+df.isnull().sum()
+
+q1 = df["Age"].describe()["25%"]
+q1
+
+q3 = df["Age"].describe()["75%"]
+q3
+
+IQR = q3 - q1
+IQR
+
+lower_limit = q1 - 1.5 * IQR
+lower_limit
+
+upper_limit = q3 + 1.5 * IQR
+upper_limit
+
+2 ways to fix the outliers
+
+1) trimming technique - completely remove/delete the outliers
+
+2) capping - update the age's above upper limit with upper limit value and update the age's below lower limit with lower limit value
+
+# Detecting the outliers
+
+
+df[  (df["Age"] < lower_limit) | ( df["Age"]  > upper_limit  )   ].shape
+
+# printing out all the non- outliers
+
+df[  (df["Age"]  >= lower_limit  )  &  (df["Age"]  <= upper_limit  )  ]
+
+# lets fix the outliers using capping method
+
+
+df["Age"] = df["Age"].clip(  lower_limit, upper_limit )
+
+sns.boxplot(  df["Age"] )
+
+age_median_value = df["Age"].median()
+age_median_value
+
+df["Age"] = df["Age"].fillna(age_median_value)
+
+df.isnull().sum()
+
+df.head()
+
+We need to convert categorical data into numerical data this process is called as encoding
+
+1) nominal col ( which has no natural order)
+
+2) ordinal col ( which has natural order)
+
+df.columns
+
+df.head()
+
+df = pd.get_dummies(  df, columns = ["Gender" , "Marital Status" , "employment_status"] , dtype = "int64" , drop_first = True )
+
+df.head()
+
+df["Reviews"] = df["Reviews"].str.strip()
+
+
+
+df["Monthly Income"] = df["Monthly Income"].str.strip()
+
+df["Educational Qualifications"] = df["Educational Qualifications"].str.strip()
+
+df["Reviews"].value_counts()
+
+d1 = { 'Positive' : 1 , 'Negative' : 0  }
+df["Reviews"] = df["Reviews"].map(d1)
+
+df.head()
+
+df["Monthly Income"].value_counts()
+
+d2 = { 'No Income' : 1 ,  'Below Rs.10000' : 2 , '10001 to 25000' : 3 , '25001 to 50000' : 4 , 'More than 50000' : 5  }
+df["Monthly Income"] = df["Monthly Income"].map(d2)
+
+df.head()
+
+df["Educational Qualifications"].value_counts()
+
+d3 = { 'Uneducated' : 1 ,  'School' : 2 , 'Graduate' : 3 , 'Post Graduate' : 4 , 'Ph.D' : 5  }
+df["Educational Qualifications"] = df["Educational Qualifications"].map(d3)
+
+df.head()
+
+d4 = { 'Yes' : 1 , 'No' : 0  }
+df["order_status"] = df["order_status"].map(d4)
+
+df.head()
+
+df_stand = df.copy()
+df_norm = df.copy()
+
+
+from sklearn.preprocessing import StandardScaler
+ss = StandardScaler();
+
+data = ss.fit_transform( df_stand )
+data
+
+newdf1 = pd.DataFrame( data, columns = df.columns )
+newdf1
+
+from sklearn.preprocessing import MinMaxScaler
+mm = MinMaxScaler()
+data = mm.fit_transform(df_norm)
+
+newdf2 = pd.DataFrame( data , columns = df.columns )
+
+newdf2
+
+Sklearn is a short form for scikit-learn , it is the one of the most important libraries in data science
+
+it gives you ready-made tools for
+1) training ml models
+2) prepare your data
+3) Evaluate models
+
+mean_median_df = pd.read_csv("/content/meanmedian.csv");
+mean_median_df.head()
+
+mean_median_df.drop(  columns = ["Unnamed: 0"] , inplace = True )
+
+mean_median_df.isnull().sum()
+
+sns.boxplot( mean_median_df["Age"] )
+
+mean_median_df["Age"].describe()
+
+q1 = mean_median_df["Age"].describe()["25%"]
+q1
+
+q3 = mean_median_df["Age"].describe()["75%"]
+q3
+
+IQR = q3- q1
+IQR
+
+lower_limit = q1 - 1.5 * IQR
+lower_limit
+
+upper_limit = q3 +  1.5 * IQR
+upper_limit
+
+sns.boxplot( mean_median_df["Fare"] )
+
+from sklearn.impute import SimpleImputer
+
+si = SimpleImputer( strategy="median" )
+
+mean_median_df["Age"] =  si.fit_transform( mean_median_df[["Age"]] )
+
+mean_median_df.isnull().sum()
+
+mean_median_df["Fare"] =  si.fit_transform( mean_median_df[["Fare"]] )
+
+mean_median_df.isnull().sum()
+
+mode_df = pd.read_csv('/content/mode.csv')
+mode_df
+
+mode_df.isnull().sum()
+
+mode_df["FireplaceQu"].value_counts()
+
+mode_value = mode_df["FireplaceQu"].mode()[0]
+mode_value
+
+mode_df["FireplaceQu"] = mode_df["FireplaceQu"].fillna(mode_value)
+
+mode_df.isnull().sum()
+
+mode_si = SimpleImputer(strategy="most_frequent");
+
+mode_df[["GarageQual"]] = mode_si.fit_transform( mode_df[["GarageQual"]] )
+
+mode_df.isnull().sum()
+
+from matplotlib import pyplot as plt
+import plotly.express as px # data viz library usin this we can create plots quickly and easily
+import plotly.graph_objects as go # Advanced and customizable graphs
+import plotly.io as pio # to get graph templates
+pio.templates.default = "plotly_white"
+
+data = pd.read_csv("/content/Sample - Superstore.csv" , encoding="latin-1");
+data.head()
+
+data.describe()
+
+data.info()
+
+Sales Analysis
+
+Q1) calculate the monthly sales of the store and identify which month has the highest sales and which month has lowest sales
+
+Ans - highest - Nov , Lowest - Feb
+
+Q2) analyse sales based on product categories and determine which category has the lowest sales and which has highest
+
+Q3) sales analysis based on sub-category
+
+Q4) analyze monthly profit from sales data and determine which month had the highest profit
+
+Q5) Analyze profit by category and sub-category
+
+Q6) Analyze sales and profit by customer segment
+
+Q7) Analyze sales to profit ratio
+
+
+'''
+Q1) calculate the monthly sales of the store and identify which month has the highest sales and which month has lowest sales
+'''
+
+# Convert date column
+
+data["Order Date"] = pd.to_datetime(  data["Order Date"] )
+
+data.info()
+
+data["Order Month"] = data["Order Date"].dt.month
+data["Order Year"] = data["Order Date"].dt.year
+data["Order Day of Week"] = data["Order Date"].dt.dayofweek
+
+data.head()
+
+sales_by_month = data.groupby("Order Month")["Sales"].sum().reset_index()
+sales_by_month
+
+fig = px.line(sales_by_month,
+        x = "Order Month",
+        y = "Sales",
+        title = "Monthly sales Analysis"
+        )
+
+fig.show()
+
+
+'''
+ Q4) analyze monthly profit from sales data and determine which month had the highest profit
+
+'''
+
+profit_by_month = data.groupby("Order Month")["Profit"].sum().reset_index()
+profit_by_month
+
+fig = px.line(profit_by_month,
+        x = "Order Month",
+        y = "Profit",
+        title = "Monthly Profit Analysis"
+        )
+
+fig.show()
+
+
+'''
+Q2) analyse sales based on product categories and determine which category has the lowest sales and which has highest
+'''
+
+
+sales_by_category = data.groupby("Category")["Sales"].sum().reset_index()
+sales_by_category
+
+fig = px.pie(sales_by_category,
+        values = "Sales",
+        names = "Category",
+        title = "sales_by_category"
+        )
+
+fig.show()
+
+
+# Q3) sales analysis based on sub-category
+sales_by_subcategory = data.groupby("Sub-Category")["Sales"].sum().reset_index()
+sales_by_subcategory
+
+
+fig = px.bar(sales_by_subcategory,
+        x = "Sub-Category",
+        y = "Sales",
+        title = "Sales Analysis by Sub-category"
+        )
+
+fig.show()
+
+
+'''
+Q6) Analyze sales and profit by customer segment
+'''
+
+sales_profit_by_segment = data.groupby("Segment").agg({ 'Sales' : 'sum' , 'Profit' : 'sum'  }).reset_index()
+
+
+fig = go.Figure()
+
+fig.add_trace(  go.Bar(
+    x = sales_profit_by_segment['Segment'],
+    y = sales_profit_by_segment["Sales"],
+    name = 'Sales'
+   ) )
+
+fig.add_trace(  go.Bar(
+    x = sales_profit_by_segment['Segment'],
+    y = sales_profit_by_segment["Profit"],
+    name = 'Profit'
+   ) )
+
+fig.show()
+
+# Q7) Analyze sales to profit ratio
+
+
+sales_profit_by_segment = data.groupby('Segment').agg({ 'Sales' : 'sum' , 'Profit' : 'sum' }).reset_index()
+sales_profit_by_segment["Sales_to_profit_ratio"] = sales_profit_by_segment["Sales"] /  sales_profit_by_segment["Profit"]
+print(sales_profit_by_segment[["Segment" , "Sales_to_profit_ratio"]])
+
+df = pd.read_csv("/content/Customer Churn.csv");
+df.head()
+
+df.info()
+
+df["TotalCharges"].value_counts()
+
+#replace banks with 0 and change the data type
+df["TotalCharges"] = df["TotalCharges"].replace(" " , "0")
+df["TotalCharges"] = df["TotalCharges"].astype("float")
+
+
+def convert_values(value):
+  if value == 1:
+    return "yes"
+  else:
+    return "no"
+
+
+df["SeniorCitizen"] =  df["SeniorCitizen"].apply(convert_values)
+
+
+df.head()
+
+df.describe()
+
+ax = sns.countplot( x = 'Churn' , data = df )
+ax.bar_label( ax.containers[0] )
+plt.title("count of Customer by Churn")
+plt.show()
+
+1869 Customers churned out
+
+What type of customers are churning out and what company can do to improve retention rate ?
+
+sns.countplot( x = "gender" , data = df , hue = "Churn"  )
+plt.title("churn by Gender")
+plt.show()
+
+ax = sns.countplot( x = "SeniorCitizen" , data = df , hue = df["Churn"] )
+ax.bar_label(ax.containers[0]  )
+plt.title("Count of Customer by Senior citizen")
+plt.show()
+
+sns.histplot(  x =  "tenure"   ,  data = df , bins = 72  , hue = "Churn" )
+plt.show()
+
+df["Contract"].value_counts()
+
+ax = sns.countplot( x = "Contract"  , data = df  , hue = "Churn" )
+ax.bar_label( ax.containers[0] )
+plt.title("Count of Customers by Contract")
+plt.show()
+
+df.columns
+
+
+columns = [
+    'PhoneService', 'MultipleLines', 'InternetService',
+    'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+    'TechSupport', 'StreamingTV', 'StreamingMovies'
+]
+
+plt.figure(figsize=(20, 14))
+
+for i, col in enumerate(columns, 1):
+    ax = plt.subplot(3, 3, i)
+    sns.countplot(x=col, data=df, hue="Churn", ax=ax)
+    ax.set_title(col)
+    ax.tick_params(axis='x', rotation=45)
+
+    # Add count labels on bars
+    for container in ax.containers:
+        ax.bar_label(container, label_type='edge', fontsize=9)
+
+plt.tight_layout()
+plt.show()
+
+
+ax = sns.countplot( x = "PaymentMethod" , data = df , hue = "Churn" )
+plt.xticks( rotation = 60 )
+ax.bar_label( ax.containers[0] )
+ax.bar_label( ax.containers[1] )
+plt.show()
+
+'''
+Sets - are built in data type used to store collection of unique elements
+
+some common set operations
+
+union : A | B
+intersection - A & B
+'''
+
+
+my_set = { 1,2,3,4,4,5  }
+
+print( my_set )
+
+A = { 1 ,2 , 3 }
+B = { 3 ,4 , 5 }
+
+# print( A & B )
+
+print( A | B )
+
+'''
+When to use sets ?
+
+- Remove duplicates
+
+'''
+
+numbers = [ 1,2,2,3,3,4,5,5  ]
+
+print( list(set(numbers)) )
