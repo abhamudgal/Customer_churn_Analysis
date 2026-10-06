@@ -341,13 +341,13 @@ python customer_churn_analysis.py
 
 # 👨‍💻 Author
 
-## Pritesh Raj
+## Abha Mudgal
 
 **Aspiring Data Analyst | Python Developer | Business Intelligence Enthusiast**
 
 ### Skills
 
-Python • SQL • Power BI • Excel • Pandas • NumPy • Data Analytics • Machine Learning
+Python • SQL • Power BI • Excel • Pandas • NumPy • Data Analytics 
 
 ---
 
